@@ -1,10 +1,18 @@
 class Ranking:
 
-    def __init__(self, variant = None, experts = None, alternatives = None, ranking_matrix = None):
+    def __init__(self, variant=None, experts=None, alternatives=None, ranking_matrix=None):
         self.variant = variant
         self.experts = experts 
         self.alternatives = alternatives
         self.ranking_matrix = ranking_matrix
+        self.alternatives_Borda = None
+
+    def __str__(self):
+        if self.ranking_matrix:
+            arr = '\n'.join('\t'.join(map(str, row)) for row in self.ranking_matrix)
+        else:
+            arr = None
+        return f'Variant {self.variant}\n\n{arr}'
 
     '''
     Загрузить матрицу из тестовых вариантов из папки input_data
@@ -16,6 +24,7 @@ class Ranking:
             experts = []
             expert_dict ={}
             alt_dict = {}
+            altB_dict ={}
             with open(path,"r") as file:
                 input_data = [[int(num) for num in line.split(' ')] for line in file]
             self.variant = variant
@@ -33,6 +42,9 @@ class Ranking:
             for i in range(self.ranking_length):
                 alt_dict[alternatives[i]] = [x[i] for x in input_data]
             self.alternatives = alt_dict
+            for i in range(self.ranking_length):
+                altB_dict[alternatives[i]] = [self.ranking_length - x[i] for x in input_data]
+            self.alternatives_Borda = altB_dict
             return True
         except IOError:
             self.ranking_matrix = None
@@ -62,12 +74,23 @@ class Ranking:
     '''
     Метод возвращает отсортированное ранжирование по сумме рангов
     '''
-    def rank_by_sum(self, rvrs = False) -> dict:
+    def rank_by_sum(self, rvrs=False) -> dict:
         ranking_sum_dict = {}
         ranking_result = {}
         for alt in self.alternatives:
             ranking_sum_dict[alt] = sum(self.alternatives[alt])
-        ranking_result = dict(sorted(ranking_sum_dict.items(), key=lambda item: item[1], reverse = rvrs))      
+        ranking_result = dict(sorted(ranking_sum_dict.items(), key=lambda item: item[1], reverse=rvrs))      
+        return ranking_result
+
+    '''
+    Метод возвращает отсортированное ранжирование по принципу Борда
+    '''
+    def rank_by_Borda(self, rvrs=True) -> dict:
+        ranking_sum_dict = {}
+        ranking_result = {}
+        for alt in self.alternatives_Borda:
+            ranking_sum_dict[alt] = sum(self.alternatives_Borda[alt])
+        ranking_result = dict(sorted(ranking_sum_dict.items(), key=lambda item: item[1], reverse=rvrs))      
         return ranking_result
 
     '''
@@ -83,13 +106,12 @@ class Ranking:
                 for i in range(len(ranking_matrix)):
                     if ranking_matrix[i][l] < ranking_matrix[i][k]:
                         sum_of_exp+=1
-                return sum_of_exp    
-                
+                return sum_of_exp 
+   
         Slk_matrix = [[0] * self.ranking_length for i in range(self.ranking_length)]
         for i in range(self.ranking_length):
             for j in range(self.ranking_length):
                 Slk_matrix[i][j] = check_pair(i, j, self.ranking_matrix)
-
         T_matrix = [[0] * self.ranking_length for i in range(self.ranking_length)]
         for i in range(self.ranking_length):
             for j in range(self.ranking_length):
@@ -105,6 +127,7 @@ class Ranking:
     Возвращает матрицу коэффициентов ранговой корреляции Спирмена.
     '''  
     def correlate_Spirman(self) -> list:
+        
         def P(n,a):
             return 1 - (6/(n * (n*n - 1))) * a
 
@@ -122,18 +145,3 @@ class Ranking:
                 value = P(n, count_pair_vectors(self.ranking_matrix[i], self.ranking_matrix[j]))
                 matrix_of_k[i][j] = round(value, 4)
         return matrix_of_k
-
-
-
-
-
-
-
-
-
-
-
-a = Ranking()
-a.load_variant(7)
-a.rank_by_Condorcet()
-print(a.get_ranking_matrix())
