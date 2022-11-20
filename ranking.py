@@ -17,56 +17,59 @@ class Ranking:
     '''
     Загрузить матрицу из тестовых вариантов из папки input_data
     '''
+    @classmethod
     def load_variant(self, variant:int) -> bool:
         path = 'input_data/' + str(variant) + '/' +  str(variant) + '.txt'
         try:
-            alternatives = []
-            experts = []
-            expert_dict ={}
-            alt_dict = {}
-            altB_dict ={}
             with open(path,"r") as file:
                 input_data = [[int(num) for num in line.split(' ')] for line in file]
-            self.variant = variant
-            self.ranking_matrix = input_data
-            self.ranking_length = len(input_data)
-            for i in range(self.ranking_length):
-                alt = 'A'
-                exp = 'E'
-                num = i+1
-                alternatives.append(alt+str(num))
-                experts.append(exp+str(num))
-            for i in range(self.ranking_length):
-                expert_dict[experts[i]] = input_data[i]
-            self.experts = expert_dict
-            for i in range(self.ranking_length):
-                alt_dict[alternatives[i]] = [x[i] for x in input_data]
-            self.alternatives = alt_dict
-            for i in range(self.ranking_length):
-                altB_dict[alternatives[i]] = [self.ranking_length - x[i] for x in input_data]
-            self.alternatives_Borda = altB_dict
-            return True
         except IOError:
             self.ranking_matrix = None
             print ("File isn't found")
             return False
-
+        alternatives, experts = [], []
+        expert_dict, alt_dict, altB_dict = {}, {}, {}
+        self.variant = variant
+        self.ranking_matrix = input_data
+        self.ranking_length = len(input_data)
+        for i in range(self.ranking_length):
+            alt, exp = 'A', 'E'
+            num = i+1
+            alternatives.append(alt+str(num))
+            experts.append(exp+str(num))
+        for i in range(self.ranking_length):
+            expert_dict[experts[i]] = input_data[i]
+        self.experts = expert_dict
+        for i in range(self.ranking_length):
+            alt_dict[alternatives[i]] = [x[i] for x in input_data]
+        self.alternatives = alt_dict
+        for i in range(self.ranking_length):
+            altB_dict[alternatives[i]] = [self.ranking_length - x[i] for x in input_data]
+        self.alternatives_Borda = altB_dict
+        return True
+    
+    @classmethod
     def get_ranking_matrix(self) -> list:
         return self.ranking_matrix
-    
+
+    @classmethod    
     def get_ranking_len(self) -> int:
         return self.ranking_length
 
+    @classmethod
     def get_experts(self) -> dict:
         return self.experts
     
+    @classmethod
     def get_alternatives(self) -> dict:
         return self.alternatives
 
+    @classmethod
     def get_expert_by_index(self,index:int) -> list:
         exp_key = 'E' +str(index)
         return self.experts[exp_key]
     
+    @classmethod
     def get_alternative_by_index(self, index:int) -> list:
         alt_key = 'A' + str(index)
         return self.alternatives[alt_key]
@@ -74,6 +77,7 @@ class Ranking:
     '''
     Метод возвращает отсортированное ранжирование по сумме рангов
     '''
+    @classmethod
     def rank_by_sum(self, rvrs=False) -> dict:
         ranking_sum_dict = {}
         ranking_result = {}
@@ -85,6 +89,7 @@ class Ranking:
     '''
     Метод возвращает отсортированное ранжирование по принципу Борда
     '''
+    @classmethod
     def rank_by_Borda(self, rvrs=True) -> dict:
         ranking_sum_dict = {}
         ranking_result = {}
@@ -96,6 +101,7 @@ class Ranking:
     '''
    
     '''
+    @classmethod
     def rank_by_Condorcet(self) -> dict:
 
         def check_pair(l,k, ranking_matrix):
@@ -107,7 +113,7 @@ class Ranking:
                     if ranking_matrix[i][l] < ranking_matrix[i][k]:
                         sum_of_exp+=1
                 return sum_of_exp 
-   
+
         Slk_matrix = [[0] * self.ranking_length for i in range(self.ranking_length)]
         for i in range(self.ranking_length):
             for j in range(self.ranking_length):
@@ -126,6 +132,7 @@ class Ranking:
     полученных от экспертов. Рассчет коэффициентов ранговой корреляции Спирмена.
     Возвращает матрицу коэффициентов ранговой корреляции Спирмена.
     '''  
+    @classmethod
     def correlate_Spirman(self) -> list:
         
         def P(n,a):
