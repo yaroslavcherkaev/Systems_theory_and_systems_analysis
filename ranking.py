@@ -103,7 +103,11 @@ class Ranking:
     '''
     @classmethod
     def rank_by_Condorcet(self) -> dict:
+        result = {}
 
+        '''
+        Функция попарного сравнения
+        '''
         def check_pair(l,k, ranking_matrix):
             if l == k:
                 return 0
@@ -114,18 +118,62 @@ class Ranking:
                         sum_of_exp+=1
                 return sum_of_exp 
 
-        Slk_matrix = [[0] * self.ranking_length for i in range(self.ranking_length)]
+        '''
+        Альтернативе Кондорсе соответствует строка из T_matrix, которая полностью состоит из единиц
+        '''
+        def get_Condorcet_alternative(alternatives:list, t_matrix:list):
+            n = len(t_matrix)
+            for i in range(n):
+                if sum(t_matrix[i]) == n:
+                    return alternatives[i]
+
+        '''
+        Для каждой пары альтернатив self.ranking_matrix[l], self.ranking_matrix[k]; l, k = 1,…,n 
+        подсчитаем число S_matrix[l][k] - это число экспертов,
+        считающих альтернативу self.ranking_matrix[l] более предпочтительной, чем self.ranking_matrix[k]. 
+        '''
+        S_matrix = [[0] * self.ranking_length for i in range(self.ranking_length)]
         for i in range(self.ranking_length):
             for j in range(self.ranking_length):
-                Slk_matrix[i][j] = check_pair(i, j, self.ranking_matrix)
+                S_matrix[i][j] = check_pair(i, j, self.ranking_matrix)
+        result['S_matrix'] = S_matrix
+
+        '''
+        Построение таблицы T_matrix, где T_matrix[l][k] = 1, если S_matrix[l][k] > S_matrix[k][l],
+        в противном случае T_matrix[l][k] = 0.
+        '''
         T_matrix = [[0] * self.ranking_length for i in range(self.ranking_length)]
         for i in range(self.ranking_length):
             for j in range(self.ranking_length):
-                if Slk_matrix[i][j] >= Slk_matrix[j][i]:
+                if S_matrix[i][j] >= S_matrix[j][i]:
                     T_matrix[i][j] = 1
                 else:
                     T_matrix[i][j] = 0
-        print(T_matrix)
+        result['T_matrix'] = T_matrix
+
+        '''
+        Результирующее ранжирование строится путем последовательного исключения
+        очередной альтернативы Кондорсе из T_matrix
+        и поиска следующей такой альтернативы среди оставшихся альтернатив.
+        '''
+        alternatives = list(self.alternatives.keys())
+        round_n = self.ranking_length
+        while round_n != 0:
+            print(T_matrix)
+            alt_C = get_Condorcet_alternative(alternatives, T_matrix) 
+            print(alt_C)   
+            index = alternatives.index(alt_C)
+            alternatives.remove(alt_C)
+            del T_matrix[index]
+            for i in range(len(T_matrix)):
+                for j in range(len(T_matrix) + 1):
+                    if j == index:
+                        del T_matrix[i][j]
+            round_n-=1
+        return result
+
+
+        
    
     '''
     Метод статистической проверки согласованности ранжирований,
@@ -152,3 +200,7 @@ class Ranking:
                 value = P(n, count_pair_vectors(self.ranking_matrix[i], self.ranking_matrix[j]))
                 matrix_of_k[i][j] = round(value, 4)
         return matrix_of_k
+
+a = Ranking()
+a.load_variant(3)
+a.rank_by_Condorcet()
