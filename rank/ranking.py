@@ -1,3 +1,6 @@
+import importlib.resources
+
+
 class Ranking:
     def __init__(self):
         self.variant = None
@@ -17,9 +20,9 @@ class Ranking:
     # Loading matrix from file
     def load_variant_from_file(self, variant: int) -> bool:
         def load_variant(variant_: int) -> list:
-            path = 'input_data/' + str(variant_) + '.txt'
+            path = str(variant_) + '.txt'
             try:
-                with open(path, "r") as file:
+                with importlib.resources.open_text('rank.input_data', path) as file:
                     input_data = [[int(num_) for num_ in line.split(' ')] for line in file]
                 return input_data
             except IOError:
@@ -120,4 +123,3 @@ class Ranking:
                 value = p(n, pair)
                 matrix_of_k[i][j] = round(value, 4)
         return matrix_of_k
-
