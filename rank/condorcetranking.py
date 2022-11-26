@@ -1,4 +1,6 @@
-from .ranking import Ranking
+from ranking import Ranking
+from utils import condorcet_to_str
+import copy
 
 
 class CondorcetRanking(Ranking):
@@ -6,6 +8,17 @@ class CondorcetRanking(Ranking):
         super().__init__()
         self.s_matrix = None
         self.t_matrix = None
+
+    def __str__(self):
+        if self.ranking_matrix:
+            rnk_matrix = '\n'.join('\t'.join(map(str, row)) for row in self.ranking_matrix)
+        else:
+            rnk_matrix = None
+        if self.result_ranking:
+            rnk_result = condorcet_to_str(self.result_ranking)
+        else:
+            rnk_result = None
+        return f'Variant {self.variant}\n\n{rnk_matrix}\n\nResult ranking:\n{rnk_result}'
 
     def rank_by_condorcet(self) -> dict:
 
@@ -43,9 +56,11 @@ class CondorcetRanking(Ranking):
         # and searching for the next such alternative among the remaining alternatives.
         alternatives = list(self.alternatives.keys())
         round_n = 0
+        ranking_result = {}
         while round_n != self.ranking_length:
             alt_c = get_condorcet_alternative(alternatives, t_matrix)
-            ranking_result[str(round_n + 1)] = (alt_c, t_matrix.copy())
+            round_list = copy.deepcopy(t_matrix)
+            ranking_result[alt_c] = round_list
             index = alternatives.index(alt_c)
             alternatives.remove(alt_c)
             del t_matrix[index]
@@ -56,3 +71,9 @@ class CondorcetRanking(Ranking):
             round_n += 1
         self.result_ranking = ranking_result
         return ranking_result
+
+
+a = CondorcetRanking()
+a.load_variant_from_file(7)
+a.rank_by_condorcet()
+print(a)

@@ -1,4 +1,4 @@
-import importlib.resources
+from utils import load_variant, dict_to_str
 
 
 class Ranking:
@@ -12,21 +12,17 @@ class Ranking:
 
     def __str__(self):
         if self.ranking_matrix:
-            arr = '\n'.join('\t'.join(map(str, row)) for row in self.ranking_matrix)
+            rnk_matrix = '\n'.join('\t'.join(map(str, row)) for row in self.ranking_matrix)
         else:
-            arr = None
-        return f'Variant {self.variant}\n\n{arr}'
+            rnk_matrix = None
+        if self.result_ranking:
+            rnk_result = dict_to_str(self.result_ranking)
+        else:
+            rnk_result = None
+        return f'Variant {self.variant}\n\n{rnk_matrix}\n\nResult ranking:\n{rnk_result}'
 
     # Loading matrix from file
     def load_variant_from_file(self, variant: int) -> bool:
-        def load_variant(variant_: int) -> list:
-            path = str(variant_) + '.txt'
-            try:
-                with importlib.resources.open_text('rank.input_data', path) as file:
-                    input_data = [[int(num_) for num_ in line.split(' ')] for line in file]
-                return input_data
-            except IOError:
-                print("File isn't found")
 
         input_variant_data = load_variant(variant)
         if input_variant_data:
