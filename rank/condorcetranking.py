@@ -1,5 +1,5 @@
-from ranking import Ranking
-from utils import condorcet_to_str
+from .ranking import Ranking
+from .utils import condorcet_to_str
 import copy
 
 
@@ -18,7 +18,7 @@ class CondorcetRanking(Ranking):
             rnk_result = condorcet_to_str(self.result_ranking)
         else:
             rnk_result = None
-        return f'Variant {self.variant}\n\n{rnk_matrix}\n\nResult ranking:\n{rnk_result}'
+        return f'Variant {self.variant}\n\n{rnk_matrix}\n\nResult ranking:\n{rnk_result}\n\n'
 
     def rank_by_condorcet(self) -> dict:
 
@@ -71,9 +71,3 @@ class CondorcetRanking(Ranking):
             round_n += 1
         self.result_ranking = ranking_result
         return ranking_result
-
-
-a = CondorcetRanking()
-a.load_variant_from_file(7)
-a.rank_by_condorcet()
-print(a)

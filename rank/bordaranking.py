@@ -1,5 +1,5 @@
-from ranking import Ranking
-from utils import load_variant, dict_to_str
+from .ranking import Ranking
+from .utils import load_variant, dict_to_str
 # TODO: add set_ranking for Borda
 
 
@@ -22,7 +22,8 @@ class BordaRanking(Ranking):
             rnk_result = dict_to_str(self.result_ranking)
         else:
             rnk_result = None
-        return f'Variant {self.variant}\n\n{rnk_matrix}\n\nBorda matrix:\n{brd_matrix}\n\nResult ranking:\n{rnk_result}'
+        return f'Variant {self.variant}\n\n{rnk_matrix}\n\nBorda matrix:\n{brd_matrix}' \
+               f'\n\nResult ranking:\n{rnk_result}\n\n'
 
     # Loading matrix from file
     def load_variant_from_file(self, variant: int) -> bool:

@@ -1,4 +1,4 @@
-from utils import load_variant, dict_to_str
+from .utils import load_variant, dict_to_str
 
 
 class Ranking:
@@ -19,7 +19,7 @@ class Ranking:
             rnk_result = dict_to_str(self.result_ranking)
         else:
             rnk_result = None
-        return f'Variant {self.variant}\n\n{rnk_matrix}\n\nResult ranking:\n{rnk_result}'
+        return f'Variant {self.variant}\n\n{rnk_matrix}\n\nResult ranking:\n{rnk_result}\n\n'
 
     # Loading matrix from file
     def load_variant_from_file(self, variant: int) -> bool:
