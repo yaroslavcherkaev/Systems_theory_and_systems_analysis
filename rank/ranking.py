@@ -1,5 +1,7 @@
+import copy
 from utils import load_variant, matrix_to_str, create_rel_mat, count_q_matrix
-from utils import p_spearman, count_pair_vectors, create_borda_matrix
+from utils import p_spearman, count_pair_vectors, check_condorcet_pair
+from utils import get_condorcet_alternative
 
 
 class Ranking:
@@ -76,6 +78,39 @@ class Ranking:
         ranking_result = dict(sorted(ranking_sum_dict.items(), key=lambda item: item[1], reverse=reverse_))
         return ranking_result
 
+    def rank_by_condorcet(self) -> dict:
+        # s_matrix[l][k] is the number of experts, who consider alternative l more preferable than k.
+        ranking_result = {}
+        s_matrix = [[0] * self.ranking_length for i in range(self.ranking_length)]
+        for i in range(self.ranking_length):
+            for j in range(self.ranking_length):
+                s_matrix[i][j] = check_condorcet_pair(i, j, self.ranking_matrix)
+        t_matrix = [[0] * self.ranking_length for i in range(self.ranking_length)]
+        for i in range(self.ranking_length):
+            for j in range(self.ranking_length):
+                if s_matrix[i][j] >= s_matrix[j][i]:
+                    t_matrix[i][j] = 1
+                else:
+                    t_matrix[i][j] = 0
+        # The resulting rank is constructed by sequentially eliminating the next Condorcet alternative from t_matrix
+        # and searching for the next such alternative among the remaining alternatives.
+        alternatives = list(self.alternatives.keys())
+        round_n = 0
+        ranking_result = {}
+        while round_n != self.ranking_length:
+            alt_c = get_condorcet_alternative(alternatives, t_matrix)
+            round_list = copy.deepcopy(t_matrix)
+            ranking_result[alt_c] = round_list
+            index = alternatives.index(alt_c)
+            alternatives.remove(alt_c)
+            del t_matrix[index]
+            for i in range(len(t_matrix)):
+                for j in range(len(t_matrix) + 1):
+                    if j == index:
+                        del t_matrix[i][j]
+            round_n += 1
+        return ranking_result
+
     def count_relation_matrices(self):
         relations_matrices = {}
         i = 1
@@ -105,10 +140,8 @@ class Ranking:
                 value = p_spearman(n, pair)
                 matrix_of_k[i][j] = round(value, 4)
         return matrix_of_k
+
     def count_kemeni_median(self):
         pass
 
-
-a = Ranking(7)
-print(a.rank_by_borda())
 

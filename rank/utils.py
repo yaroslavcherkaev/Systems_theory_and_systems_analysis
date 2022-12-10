@@ -85,6 +85,24 @@ def p_spearman(ranking_len: int, pair: int):
     return 1 - (6 / (ranking_len * (ranking_len * ranking_len - 1))) * pair
 
 
+def check_condorcet_pair(left, right, ranking_matrix):
+    if left == right:
+        return 0
+    else:
+        sum_of_exp = 0
+        for i in range(len(ranking_matrix)):
+            if ranking_matrix[i][left] < ranking_matrix[i][right]:
+                sum_of_exp += 1
+        return sum_of_exp
+
+
+def get_condorcet_alternative(alternatives_: list, t_matrix_: list):
+    n = len(t_matrix_)
+    for i in range(n):
+        if sum(t_matrix_[i]) == n:
+            return alternatives_[i]
+
+
 
 '''
 Function to print to the console the result ranking.
