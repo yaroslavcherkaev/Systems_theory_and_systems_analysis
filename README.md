@@ -11,23 +11,20 @@ pip install .
 Finally, you can use this package in this way:
 
 ```
-from rank import ranking, bordaranking, condorcetranking
+from rank import ranking, utils
 
+my_ranking = ranking.Ranking('ranking.txt')
+print(my_ranking)
 
-a = ranking.Ranking()
-a.load_variant_from_file(7)
-a.rank_by_sum()
-print(a)
+borda = my_ranking.rank_by_borda()
+print(borda)
 
-b = bordaranking.BordaRanking()
-b.load_variant_from_file(7)
-b.rank_by_borda()
-print(b)
+rank_sum = my_ranking.rank_by_sum()
+print(rank_sum)
 
-c =  condorcetranking.CondorcetRanking()
-c.load_variant_from_file(7)
-c.rank_by_condorcet()
-print(c)
+condorcet = my_ranking.rank_by_condorcet()
+print(utils.condorcet_to_str(condorcet))
+
 
 ```
 
@@ -36,10 +33,6 @@ print(c)
 The `rank` package is intended for calculations related to the ranking of alternatives.
 
 The package so far supports only symmetric matrices(NxN) for comparing alternatives.
-
-The package contains 8 variants with different matrix of comparison of alternatives (6x6).
-
-You can load these variants using `load_variant_from_file(variant: int)` method.
 
 
 
